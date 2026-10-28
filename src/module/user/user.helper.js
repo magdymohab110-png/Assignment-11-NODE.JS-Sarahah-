@@ -6,6 +6,7 @@ import { findOne } from '../../DB/service/db.service.js';
 import * as dbRedis from './../../DB/service/redis.service.js';
 import emailTemplate from './../../common/utils/otp-email-template.js';
 import userModel from '../../DB/model/user.model.js';
+import { OTP_BLOCK_SENDEMAIL, OTP_EMAIL, OTP_MAX_EMAIL, SALT_ROUNDS } from '../../../config/config.service.js';
 
 
 export const sendEmailOtp = async({email , subject = "confirm_email" , isConfirmed, eventOn = "confirm_email",  }) =>{
@@ -22,7 +23,7 @@ export const sendEmailOtp = async({email , subject = "confirm_email" , isConfirm
                 await dbRedis.setValue({
                     key : `otp::max::${email}`,
                     value : 0,
-                    ttl : 60 * 5
+                    ttl : OTP_MAX_EMAIL
                 })
             }
         }
@@ -37,7 +38,7 @@ export const sendEmailOtp = async({email , subject = "confirm_email" , isConfirm
             await dbRedis.setValue({
                 key : `otp::block::${email}`,
                 value : "1",
-                ttl : 60 * 10
+                ttl : OTP_BLOCK_SENDEMAIL
             })
             throw new Error(`you exceed the number of requests`);
         }
@@ -55,7 +56,7 @@ export const sendEmailOtp = async({email , subject = "confirm_email" , isConfirm
         }
     
         const otp = await generate_otp();
-        const otpHash = await HashSync(otp , 12);
+        const otpHash = await HashSync(otp , SALT_ROUNDS);
     
         eventEmitter.emit(eventOn , async ()=>{
             await sendEmail({
@@ -65,7 +66,7 @@ export const sendEmailOtp = async({email , subject = "confirm_email" , isConfirm
                     appName : "Sarahah app",
                     userName : user.fName,
                     otp,
-                    expiryMinutes : 5
+                    expiryMinutes : (OTP_EMAIL / 60)
                 })
             })
         })
@@ -73,7 +74,7 @@ export const sendEmailOtp = async({email , subject = "confirm_email" , isConfirm
         await dbRedis.setValue({
             key : `otp::${email}`,
             value : otpHash,
-            ttl : 60 * 5
+            ttl : OTP_EMAIL
         });
     
         await dbRedis.incr(`otp::max::${email}`);

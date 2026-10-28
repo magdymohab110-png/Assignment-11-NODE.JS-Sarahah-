@@ -6,14 +6,15 @@ import { authentication } from "../../common/middleware/authentication.js";
 import { authoriztion } from "../../common/middleware/authroization.js";
 import { multerLocal } from "../../common/middleware/multer.js";
 import { roleEnum } from "../../enum/user.enum.js";
+import { multerEnum } from './../../enum/multer.enum.js';
 
-const userRouter = Router();
+const userRouter = Router({strict : true , caseSensitive : true});
 
 // sign up user
 userRouter.post("/signup" , 
-    multerLocal({customPath : "admins" ,customTypes : ["image/png"]}).fields([
-        {name : "attachment" , max : 1},
-        {name : "attachments" , max : 5}
+    multerLocal({customPath : "admins" ,customTypes : multerEnum.images}).fields([
+        {name : "attachment" , maxCount : 1},
+        {name : "attachments" , maxCount : 5}
     ]) 
     ,Validation(schema.signUpSchema), US.signUp);
 

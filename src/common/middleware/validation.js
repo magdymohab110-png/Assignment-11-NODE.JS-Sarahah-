@@ -17,7 +17,9 @@ const Validation = (schema)=>{
            }
         }
         if(errResult.length){
-            return res.status(400).json({errResult})
+            const error = new Error("Validation error !");
+            error.errors = errResult;
+            throw error
         }
         next();
     }

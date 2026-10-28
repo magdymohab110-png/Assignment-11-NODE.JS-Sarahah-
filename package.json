@@ -5,8 +5,8 @@
   "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "cross-env NODE_ENV=dev nodemon src/index.js",
-    "prod": "cross-env NODE_ENV=prod nodemon src/index.js"
+    "start:dev": "cross-env NODE_ENV=development nodemon src/index.js",
+    "start:prod": "cross-env NODE_ENV=production nodemon src/index.js"
   },
   "keywords": [],
   "author": "",
@@ -18,7 +18,9 @@
     "cross-env": "^10.1.0",
     "dotenv": "^18.0.6",
     "express": "^5.2.1",
+    "express-rate-limit": "^8.7.1",
     "google-auth-library": "^11.2.0",
+    "helmet": "^8.3.0",
     "joi": "^18.2.9",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.11.0",

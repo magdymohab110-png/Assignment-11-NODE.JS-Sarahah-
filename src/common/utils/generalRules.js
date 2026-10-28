@@ -3,6 +3,7 @@ import { genderEnum } from "../../enum/user.enum.js"
 import { Types } from "mongoose"
 export const generalRules ={
 
+    content : joi.string(),
     id : joi.string().hex().custom((v,h)=>{
         return Types.ObjectId.isValid(v) ? v : h.message("invaild id") 
     }),

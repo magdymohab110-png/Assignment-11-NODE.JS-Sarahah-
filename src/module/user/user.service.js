@@ -12,6 +12,9 @@ import * as dbRedis from './../../DB/service/redis.service.js';
 import { generate_otp, sendEmail } from "../../common/service/sendEmail.js";
 import { eventEmitter } from "../../common/utils/events.js";
 import { sendEmailOtp } from "./user.helper.js";
+import * as env  from "../../../config/config.service.js";
+import { successResponse } from './../../common/utils/success.response.js';
+import emailTemplate from "../../common/utils/otp-email-template.js";
 const client = new OAuth2Client();
 
 //====================================== sign up user ===========================
@@ -21,7 +24,7 @@ export const signUp = async (req , res , next) =>{
     const {fName,lName ,email,password,age,gender,phone,role} = req.body;
 
     const paths = [];
-    console.log(req.files);
+    // console.log(req.files);
     
     for (const file of req.files.attachments) {
         paths.push(file.path);
@@ -37,19 +40,23 @@ export const signUp = async (req , res , next) =>{
     }
 
     const otp = await generate_otp();
-    const otpHash = await HashSync(otp , 12);
+    const otpHash = await HashSync(otp , env.SALT_ROUNDS);
 
     await dbRedis.setValue({
         key : `otp::${email}`,
         value : otpHash,
-        ttl : 60 *2
+        ttl : env.OTP_EMAIL
     })
 
    eventEmitter.emit("confirm_email" , async()=>{
      await sendEmail({
         to : email,
         subject : "confirm email from sarahah app",
-        html : `<h1>otp : ${otp}</h1>`
+        html : await emailTemplate({
+            appName : "Sarahah app",
+            expiryMinutes : (env.OTP_EMAIL / 60),
+            otp
+        })
     })
    })
 
@@ -61,7 +68,7 @@ export const signUp = async (req , res , next) =>{
             gender,
             age,
             email,
-            password :await HashSync(password),
+            password :await HashSync(password , env.SALT_ROUNDS),
             provider : providerEnum.system,
             phone : Encrypt(phone),
             gender,
@@ -71,7 +78,11 @@ export const signUp = async (req , res , next) =>{
         }
     });
 
-    return res.status(201).json({mesage : "user created successfully" , user});
+    const createdUser = Array.isArray(user) ? user[0] : user;
+
+    const checkPassword = !await CompareSync({plainText : "12345121" , Encrypt: createdUser.password}) ? true : false
+
+    successResponse({res, statusCode : 201 , message :"user created successfully" ,data : {user , checkPassword}});
 }
 
 //====================================== sign in user ===========================
@@ -94,7 +105,7 @@ export const signIn = async(req,res,next)=>{
         await dbRedis.setValue({
             key : `signIn::block::${emailLowerCase}`,
             value : "1",
-            ttl : 60 * 5
+            ttl : env.OTP_BLOCK_SIGNIN
         })
         await dbRedis.deleteKey(`signIn::${emailLowerCase}`);
 
@@ -104,7 +115,7 @@ export const signIn = async(req,res,next)=>{
 
     const user = await dbServices.findOne({
         model : userModel,
-        filter : {emailLowerCase,
+        filter : {email : emailLowerCase,
             provider : providerEnum.system,
             isConfirmed : {$exists : true}
         }
@@ -115,25 +126,26 @@ export const signIn = async(req,res,next)=>{
     }
 
     if(!await CompareSync({plainText : password , Encrypt : user.password})){
-        await dbRedis.incr(`signIn::${email}`);
+        await dbRedis.incr(`signIn::${emailLowerCase}`);
         throw new Error("password invalid" , {cause : 400});
     }
+    console.log(user.email, user._id);
 
     const tokenId = randomUUID();
 
-    const access_token = jwt.sign({ id : user._id} ,"mohab1234" , {
-        expiresIn : 60*5,
+    const access_token = jwt.sign({ id : user._id} ,env.ACCESS_TOKEN_SIGNTURE , {
+        expiresIn : env.ACCESS_TOKEN_EXP,
         jwtid : tokenId
     });
 
-    const refresh_token = jwt.sign({id : user._id } ,"mohab1234123",{
-        expiresIn : 60*60,
+    const refresh_token = jwt.sign({id : user._id } ,env.REFRESH_TOKEN_SIGNTURE,{
+        expiresIn : env.REFRESH_TOKEN_EXP,
         jwtid : tokenId
     });
 
-    await dbRedis.deleteKey(`signIn::${email}`);
+    await dbRedis.deleteKey(`signIn::${emailLowerCase}`);
 
-    return res.status(200).json({message : "done" , user , access_token ,refresh_token });
+    successResponse({res, message : "done" , data : {user , access_token , refresh_token}});
 
 }
 
@@ -144,7 +156,7 @@ export const getProfile = async (req,res,next) =>{
 
     const user = req.user;
 
-    return res.status(200).json({message : "user profile found successfully" , user});
+    successResponse({res, message : "user profile found successfully" , data : user });
 
 }
 
@@ -156,7 +168,7 @@ export const signUpWithGmail = async(req,res,next) =>{
 
   const verifyToken = await client.verifyIdToken({
       idToken,
-      audience: "937290768910-d9atnrcpu0g8m9dmp8aqvigmhoirn8l7.apps.googleusercontent.com"
+      audience: env.AUDIENCE_GMAIL
   });
   const payload = verifyToken.getPayload();
 
@@ -185,14 +197,15 @@ export const signUpWithGmail = async(req,res,next) =>{
     if(user.provider == providerEnum.system){
         throw new Error("the account already exist on system please log in with system" , {cause : 400});
     }
-    const access_token = jwt.sign({id : user._id} , "mohab1234" ,{
-        expiresIn : 60*5
+    const access_token = jwt.sign({id : user._id} , env.ACCESS_TOKEN_SIGNTURE ,{
+        expiresIn : env.ACCESS_TOKEN_EXP
     });
-    const refresh_token = jwt.sign({id : user._id} , "mohab1234123");
+    const refresh_token = jwt.sign({id : user._id} , env.REFRESH_TOKEN_SIGNTURE , {
+        expiresIn : env.REFRESH_TOKEN_EXP
+    });
 
-    return res.status(200).json({message : "user loggin in with google successfully"});
+    successResponse({res , message : "user loggin in with google successfully"});
 
-    
 }
 
 
@@ -204,9 +217,9 @@ export const refreshToken = async(req,res,next)=>{
         throw new Error("refresh token is required" , {casue : 400});
     }
     
-    const verifyToken = jwt.verify(authorization , "mohab1234123");
-    if(!verifyToken){
-        throw new Error("refresh token invalid" , {casue : 400});
+    const verifyToken = jwt.verify(authorization , env.REFRESH_TOKEN_SIGNTURE);
+    if(Date.now() < verifyToken.iat + env.ACCESS_TOKEN_EXP){
+        throw new Error("access token is still vaild" , {casue : 400});
     }
 
     const user = await dbServices.findById({
@@ -218,12 +231,12 @@ export const refreshToken = async(req,res,next)=>{
         throw new Error("user not exist" , {cause : 404});
     }
 
-    const access_token = jwt.sign({id : user._id}, "mohab1234", {
-        expiresIn : 60*5
+    const access_token = jwt.sign({id : user._id}, env.ACCESS_TOKEN_SIGNTURE, {
+        expiresIn : env.ACCESS_TOKEN_EXP
     })
 
-    return res.status(201).json({message : "done" , access_token})
-    
+    successResponse({res , message : "access token created successfully" , data : access_token});
+
 }
 
 //====================================== share profile user ===========================
@@ -242,7 +255,7 @@ if(!user){
 
 user.phone = Decrypt(user.phone);
 
-return res.status(200).json({message : "done" , user});
+successResponse({res , data : user});
 
 }
 
@@ -278,7 +291,8 @@ export const updateProfile = async(req,res,next)=>{
         update : updateQuery
     });
 
-    return res.status(200).json({message : "user updated" , user})
+    successResponse({res , message : "user updated" , data : user });
+
 }
 
 
@@ -295,12 +309,12 @@ export const updatePassword = async(req,res,next) =>{
         throw new Error("the old password same new password" , {cause : 400});
     }
 
-    req.user.password = await HashSync(newPassword);
+    req.user.password = await HashSync(newPassword , env.SALT_ROUNDS);
     req.user.changeCredentialAt = Date.now();
 
     await req.user.save();
     
-    return res.status(200).json({message : "password updated successfully" , user : req.user});
+    successResponse({res , message : "password updated successfully" , data :{user : req.user}});
 }
 
 
@@ -310,11 +324,13 @@ export const updatePassword = async(req,res,next) =>{
 
 export const logOut = async(req,res,next)=>{
 const {flag} = req.query;
+
 if(flag == "all"){
     req.user.changeCredentialAt = Date.now();
     req.user.save();
     await dbRedis.deleteKey(dbRedis.keys(`revoke_token::${req.user._id}`));
 }
+
 else{
 await dbRedis.setValue({
     key : `revoke_token::${req.user._id}::${req.verifyToken.jti}`,
@@ -323,6 +339,8 @@ await dbRedis.setValue({
 
 })
 }
+
+successResponse({res, message : "log out successfully"});
 }
 
 //====================================== confirm email ===========================
@@ -354,7 +372,8 @@ export const confirmEmail = async(req,res,next) =>{
     }
 
     await dbRedis.deleteKey(otpValue);
-    return res.status(200).json({message : "email confirmed successfully" , user});
+
+    successResponse({res , message : "email confirmed successfully" , data : user});
 }
 
 //====================================== resend otp ===========================
@@ -368,7 +387,9 @@ export const reSendOtp = async(req,res,next)=>{
         isConfirmed : false,
         eventOn : "confirm_email"
     })
-    return res.status(200).json({message : "operation of resend otp done successfully"});
+
+    successResponse({res , message : "operation of resend otp done successfully"});
+
 }
 
 //====================================== forget password ===========================
@@ -383,7 +404,7 @@ export const forgetPassword = async(req,res,next) =>{
         eventOn : "forget_password"
     });
 
-    return res.status(200).json({message : "done"});
+    successResponse({res})
 
 }
 //====================================== reset password ===========================
@@ -407,7 +428,7 @@ export const resetPassword = async(req,res,next) =>{
             isConfirmed : true
         },
         update : {
-            password : await HashSync(password , 12),
+            password : await HashSync(password , env.SALT_ROUNDS),
             changeCredentialAt : Date.now()
         }
     })
@@ -418,5 +439,5 @@ export const resetPassword = async(req,res,next) =>{
 
     await dbRedis.deleteKey(`otp::${emailLowerCase}`);
 
-    return res.status(200).json({message : "reset password done successfully"});
-}
+    successResponse({res, message : "reset password done successfully"});
+} 

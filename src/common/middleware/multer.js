@@ -1,9 +1,10 @@
 import multer from "multer"
 import fs from "fs"
 import { randomUUID } from "crypto";
+import { UPLOAD_FOLDER } from "../../../config/config.service.js";
 
 export const multerLocal = ({customPath = "General" , customTypes = []})=>{
-    const fullPath = `uploads/${customPath}`;
+    const fullPath = `${UPLOAD_FOLDER}/${customPath}`;
     if(!fs.existsSync(fullPath)){
         fs.mkdirSync(fullPath , {recursive : true});
     }
