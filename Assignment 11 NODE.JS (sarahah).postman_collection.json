@@ -1,0 +1,848 @@
+{
+  "info": {
+    "_postman_id": "93f6db9a-cd3e-4d2c-9bed-fe47b6b3fd78",
+    "name": "Assignment 11 NODE.JS (sarahah)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "49377799",
+    "_collection_link": "https://go.postman.co/collection/49377799-93f6db9a-cd3e-4d2c-9bed-fe47b6b3fd78?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "user",
+      "item": [
+        {
+          "name": "sign up user",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "attachment",
+                  "type": "file",
+                  "src": [
+                    "/C:/Users/Mohab 2006/OneDrive/Pictures/Screenshots/Screenshot (51).png"
+                  ]
+                },
+                {
+                  "key": "fName",
+                  "value": "mohab",
+                  "type": "text"
+                },
+                {
+                  "key": "lName",
+                  "value": "magdy",
+                  "type": "text"
+                },
+                {
+                  "key": "email",
+                  "value": "magdymohab348@gmail.com",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "1235678",
+                  "type": "text"
+                },
+                {
+                  "key": "gender",
+                  "value": "male",
+                  "type": "text"
+                },
+                {
+                  "key": "phone",
+                  "value": "01285192056",
+                  "type": "text"
+                },
+                {
+                  "key": "age",
+                  "value": "40",
+                  "type": "text"
+                },
+                {
+                  "key": "attachments",
+                  "type": "file",
+                  "src": [
+                    "/C:/Users/Mohab 2006/OneDrive/Pictures/Screenshots/Screenshot (51).png",
+                    "/C:/Users/Mohab 2006/OneDrive/Pictures/Screenshots/Screenshot (58).png"
+                  ]
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{local_url}}/users/signup",
+              "host": [
+                "{{local_url}}"
+              ],
+              "path": [
+                "users",
+                "signup"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "sign in user",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let response = pm.response.json();\r\nconsole.log(response);\r\npm.environment.set(\"access_token\",response.data.access_token);\r\npm.environment.set(\"refresh_token\",response.data.refresh_token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\" :\"mohabmagdy425@gmail.com\",\r\n    \"password\" : \"12345121\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{local_url}}/users/signin",
+              "host": [
+                "{{local_url}}"
+              ],
+              "path": [
+                "users",
+                "signin"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get user profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{local_url}}/users/profile",
+              "host": [
+                "{{local_url}}"
+              ],
+              "path": [
+                "users",
+                "profile"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "refresh token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{refresh_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "text"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{local_url}}/users/refresh-token",
+              "host": [
+                "{{local_url}}"
+              ],
+              "path": [
+                "users",
+                "refresh-token"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "share profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "text"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{local_url}}/users/share-profile/6ade49a0ea96baf91151c62f",
+              "host": [
+                "{{local_url}}"
+              ],
+              "path": [
+                "users",
+                "share-profile",
+                "6ade49a0ea96baf91151c62f"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "update profile",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"fName\": \"homo\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{local_url}}/users/update-profile",
+              "host": [
+                "{{local_url}}"
+              ],
+              "path": [
+                "users",
+                "update-profile"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "update password",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"oldPassword\" :\"12345\" ,\r\n    \"newPassword\" : \"123s45123122\",\r\n    \"cPassword\" : \"123s45123122\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{local_url}}/users/update-password",
+              "host": [
+                "{{local_url}}"
+              ],
+              "path": [
+                "users",
+                "update-password"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "log out",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "text"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{local_url}}/users/logout",
+              "host": [
+                "{{local_url}}"
+              ],
+              "path": [
+                "users",
+                "logout"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "confirm email",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\" : \"magdymohab348@gmail.com\",\r\n    \"otp\" : \"801840\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{local_url}}/users/confirm-email",
+              "host": [
+                "{{local_url}}"
+              ],
+              "path": [
+                "users",
+                "confirm-email"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "resend otp",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\" : \"magdymohab348@gmail.com\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{local_url}}/users/resend-otp",
+              "host": [
+                "{{local_url}}"
+              ],
+              "path": [
+                "users",
+                "resend-otp"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "forget password",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\" : \"mohabmagdy425@gmail.com\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{local_url}}/users/forget-password",
+              "host": [
+                "{{local_url}}"
+              ],
+              "path": [
+                "users",
+                "forget-password"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "reset password",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\" : \"mohabmagdy425@gmail.com\",\r\n    \"password\" : \"12345121\",\r\n    \"otp\" :\"715039\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{local_url}}/users/reset-password",
+              "host": [
+                "{{local_url}}"
+              ],
+              "path": [
+                "users",
+                "reset-password"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "message",
+      "item": [
+        {
+          "name": "create message",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "content",
+                  "value": "hi",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "userId",
+                  "value": "6ade49a0ea96baf91151c62f",
+                  "type": "text"
+                },
+                {
+                  "key": "attachments",
+                  "type": "file",
+                  "src": [
+                    "/C:/Users/Mohab 2006/OneDrive/Pictures/Screenshots/Screenshot (57).png"
+                  ]
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{local_url}}/messages/create",
+              "host": [
+                "{{local_url}}"
+              ],
+              "path": [
+                "messages",
+                "create"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get all messages",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
+            "url": {
+              "raw": "{{local_url}}/messages/all",
+              "host": [
+                "{{local_url}}"
+              ],
+              "path": [
+                "messages",
+                "all"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get message by id",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
+            "url": {
+              "raw": "{{local_url}}/messages/6ade6e403f2d705d61829e7c",
+              "host": [
+                "{{local_url}}"
+              ],
+              "path": [
+                "messages",
+                "6ade6e403f2d705d61829e7c"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "delete message by id",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
+            "url": {
+              "raw": "{{local_url}}/messages/6ade88ca7bd579f8fabe7002",
+              "host": [
+                "{{local_url}}"
+              ],
+              "path": [
+                "messages",
+                "6ade88ca7bd579f8fabe7002"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "delete all messages",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{local_url}}/messages/all",
+              "host": [
+                "{{local_url}}"
+              ],
+              "path": [
+                "messages",
+                "all"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "identity request",
+      "item": [
+        {
+          "name": "identity request message",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"messageId\" : \"6ae0e01eb972d8952121fc8a\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{local_url}}/identity-requests",
+              "host": [
+                "{{local_url}}"
+              ],
+              "path": [
+                "identity-requests"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get pend identity requests",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{local_url}}/identity-requests/pending",
+              "host": [
+                "{{local_url}}"
+              ],
+              "path": [
+                "identity-requests",
+                "pending"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "update identity request",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"status\" : \"accepted\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{local_url}}/identity-requests/6ae0e045b972d8952121fc8b",
+              "host": [
+                "{{local_url}}"
+              ],
+              "path": [
+                "identity-requests",
+                "6ae0e045b972d8952121fc8b"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "status identity request",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{local_url}}/identity-requests/status/6adf9c13190b877b8a542293",
+              "host": [
+                "{{local_url}}"
+              ],
+              "path": [
+                "identity-requests",
+                "status",
+                "6adf9c13190b877b8a542293"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "conversation",
+      "item": [
+        {
+          "name": "get conversations",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{local_url}}/conversations/all",
+              "host": [
+                "{{local_url}}"
+              ],
+              "path": [
+                "conversations",
+                "all"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get conversation by id",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"messageId\" : \"6adf7e402918fe483e349344\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{local_url}}/conversations/6ae0e05fb972d8952121fc81",
+              "host": [
+                "{{local_url}}"
+              ],
+              "path": [
+                "conversations",
+                "6ae0e05fb972d8952121fc81"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "chat message",
+      "item": [
+        {
+          "name": "create chat message",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "conversationId",
+                  "value": "6ae0e05fb972d8952121fc8c",
+                  "type": "text"
+                },
+                {
+                  "key": "content",
+                  "value": "hi 10",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{local_url}}/chat-messages/send",
+              "host": [
+                "{{local_url}}"
+              ],
+              "path": [
+                "chat-messages",
+                "send"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get all chat messages",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{local_url}}/chat-messages/all/6ae0e05fb972d8952121fc8c",
+              "host": [
+                "{{local_url}}"
+              ],
+              "path": [
+                "chat-messages",
+                "all",
+                "6ae0e05fb972d8952121fc8c"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get chat message by id",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{local_url}}/chat-messages/6ae0e07cb972d8952121fc8d",
+              "host": [
+                "{{local_url}}"
+              ],
+              "path": [
+                "chat-messages",
+                "6ae0e07cb972d8952121fc8d"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
